@@ -1,0 +1,91 @@
+{
+  "name": "datocms-plugin-composed-title",
+  "homepage": "https://github.com/symbio/datocms-plugin-composed-title",
+  "version": "0.0.1",
+  "description": "Compose title out of more fields",
+  "main": "index.js",
+  "scripts": {
+    "start": "concurrently \"yarn dev\" \"yarn localtunnel\"",
+    "localtunnel": "lt -s datocms-plugin-composed-title --port 5000",
+    "dev": "NODE_ENV=development webpack-dev-server --port 5000",
+    "dist": "NODE_ENV=production webpack --progress",
+    "build": "NODE_ENV=production webpack --progress",
+    "prepublishOnly": "rimraf lib dist && mkdir dist && npm run dist",
+    "addToProject": "yo datocms-plugin:add-to-project",
+    "test": "echo 1"
+  },
+  "keywords": [
+    "datocms",
+    "datocms-plugin",
+    "field-editor",
+    "string-field"
+  ],
+  "files": [
+    "dist",
+    "docs"
+  ],
+  "author": "SYMBIO <dev@symbio.agency>",
+  "license": "ISC",
+  "datoCmsPlugin": {
+    "title": "Composed Title",
+    "previewImage": "docs/preview.gif",
+    "coverImage": "docs/cover.png",
+    "entryPoint": "dist/index.html",
+    "pluginType": "field_editor",
+    "fieldTypes": [
+      "string"
+    ],
+    "parameters": {
+      "global": [],
+      "instance": [
+        {
+          "id": "fields",
+          "label": "Fields",
+          "type": "string",
+          "required": true,
+          "default": "",
+          "hint": "Fill in fields' ID separated by comma"
+        },
+        {
+          "id": "prefix",
+          "label": "URL prefix",
+          "type": "string",
+          "required": true,
+          "default": "https://www.example.com/",
+          "hint": "Specifikujte reálný URL prefix pro tento slug (bude zobrazen v editoru)"
+        }
+      ]
+    }
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.7.4",
+    "@babel/core": "^7.7.4",
+    "@babel/preset-env": "^7.7.4",
+    "@babel/register": "^7.7.4",
+    "babel-eslint": "^10.0.3",
+    "babel-loader": "^8.0.6",
+    "concurrently": "^5.0.0",
+    "css-loader": "^3.2.0",
+    "eslint": "^6.7.1",
+    "eslint-config-airbnb-base": "^14.0.0",
+    "eslint-import-resolver-webpack": "^0.11.1",
+    "eslint-loader": "^3.0.2",
+    "eslint-plugin-import": "^2.18.2",
+    "generator-datocms-plugin": "^1.0.20",
+    "html-webpack-include-assets-plugin": "^2.0.0",
+    "html-webpack-inline-source-plugin": "^0.0.10",
+    "html-webpack-plugin": "^3.2.0",
+    "html-webpack-tags-plugin": "^2.0.17",
+    "localtunnel": "^2.0.0",
+    "mini-css-extract-plugin": "^0.8.0",
+    "serve": "^11.2.0",
+    "style-loader": "^1.0.0",
+    "webpack": "^4.41.2",
+    "webpack-cli": "^3.3.10",
+    "webpack-dev-server": "^3.9.0",
+    "yo": "^2.0.6"
+  },
+  "dependencies": {
+    "slugify": "^1.3.6"
+  }
+}
