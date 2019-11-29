@@ -9,11 +9,13 @@ function getValue(plugin, fields) {
         output = output.replace(`{${field}}`, fieldValue[plugin.locale]);
       } else if (typeof fieldValue === 'string') {
         output = output.replace(`{${field}}`, fieldValue);
+      } else {
+        output = output.replace(`{${field}}`, '');
       }
     }
   });
 
-  output = output.replace(' ()', '');
+  output = output.replace(' ()', '').trim();
 
   return output;
 }
