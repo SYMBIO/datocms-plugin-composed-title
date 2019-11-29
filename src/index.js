@@ -1,44 +1,39 @@
 import './style.css';
 
 function getValue(plugin, fields) {
-  const parts = [];
+  let output = plugin.parameters.instance.format;
   fields.forEach((field) => {
     const fieldValue = plugin.getFieldValue(field);
     if (fieldValue) {
       if (typeof fieldValue === 'object' && Object.prototype.hasOwnProperty.call(fieldValue, plugin.locale)) {
-        parts.push(fieldValue[plugin.locale]);
+        output = output.replace(`{${field}}`, fieldValue[plugin.locale]);
       } else if (typeof fieldValue === 'string') {
-        parts.push(fieldValue);
+        output = output.replace(`{${field}}`, fieldValue);
       }
     }
   });
 
-  return parts.join(' ');
+  output = output.replace(' ()', '');
+
+  return output;
 }
 
 window.DatoCmsPlugin.init((plugin) => {
   plugin.startAutoResizer();
 
-  const fields = plugin.parameters.instance.fields.split(',')
-    .map((a) => a.trim());
+  function getFields() {
+    const matches = plugin.parameters.instance.format.match(/\{([a-z_]+)\}/g);
+
+    return matches.map((m) => m.toString().replace(/^\{+|\}+$/g, ''));
+  }
+
+  const fields = getFields();
 
   const container = document.createElement('div');
-  container.classList.add('input-group');
-  container.classList.add('input-group--small');
 
-  const addon = document.createElement('div');
-  addon.classList.add('input-group__addon');
-  const span = document.createElement('span');
-  span.textContent = plugin.parameters.instance.prefix;
-  addon.appendChild(span);
+  const input = document.createElement('span');
+  input.textContent = plugin.getFieldValue(plugin.fieldPath);
 
-  const input = document.createElement('input');
-  input.placeholder = plugin.placeholder;
-  input.autocomplete = 'off';
-  input.type = 'text';
-  input.value = getValue(plugin, fields);
-
-  container.appendChild(addon);
   container.appendChild(input);
 
   document.body.appendChild(container);
@@ -49,9 +44,10 @@ window.DatoCmsPlugin.init((plugin) => {
 
   fields.forEach((field) => {
     plugin.addFieldChangeListener(field, () => {
-      console.log('change');
-      plugin.setFieldValue(plugin.fieldPath, getValue(plugin, fields));
-      input.value = getValue(plugin, fields);
+      if (plugin.locale === plugin.site.attributes.locales[0]) {
+        plugin.setFieldValue(plugin.fieldPath, getValue(plugin, fields));
+        input.textContent = getValue(plugin, fields);
+      }
     });
   });
 });

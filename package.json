@@ -39,20 +39,12 @@
       "global": [],
       "instance": [
         {
-          "id": "fields",
-          "label": "Fields",
+          "id": "format",
+          "label": "Format",
           "type": "string",
           "required": true,
           "default": "",
-          "hint": "Fill in fields' ID separated by comma"
-        },
-        {
-          "id": "prefix",
-          "label": "URL prefix",
-          "type": "string",
-          "required": true,
-          "default": "https://www.example.com/",
-          "hint": "Specifikujte reálný URL prefix pro tento slug (bude zobrazen v editoru)"
+          "hint": "Fill in format of the title. Use { and } for defining placeholders for fields, ie. {title}."
         }
       ]
     }
