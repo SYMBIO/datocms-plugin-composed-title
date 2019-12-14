@@ -1,34 +1,79 @@
 import './style.css';
 
+function getFieldValue(plugin, field) {
+  const fieldValue = plugin.getFieldValue(field);
+  if (fieldValue) {
+    if (typeof fieldValue === 'object' && Object.prototype.hasOwnProperty.call(fieldValue, plugin.locale)) {
+      if (fieldValue[plugin.locale]) {
+        return fieldValue[plugin.locale];
+      }
+      return '';
+    }
+    if (typeof fieldValue === 'string') {
+      return fieldValue;
+    }
+    return '';
+  }
+  return '';
+}
+
+function getLinkFieldValue(plugin, linkField, field) {
+    const token = plugin.parameters.global.datoCmsApiToken;
+    const modelName = plugin.itemType.attributes.api_key;
+
+    return new Promise(resolve => {
+        const { data } = fetch('https://graphql.datocms.com/preview', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            query: `{ ${modelName}(locale: ${plugin.locale}, filter: { id: { eq: "${plugin.itemId}" } }) { ${linkField} { ${field} } } }`,
+          }),
+        }).then(res => res.json()).then(({ data }) => {
+          resolve({
+            field: linkField + '.' + field,
+            value: data[modelName][linkField] ? data[modelName][linkField][field] : '',
+          });
+        });
+    })
+}
+
 function getValue(plugin, fields) {
   let output = plugin.parameters.instance.format;
-  fields.forEach((field) => {
-    const fieldValue = plugin.getFieldValue(field);
-    if (fieldValue) {
-      if (typeof fieldValue === 'object' && Object.prototype.hasOwnProperty.call(fieldValue, plugin.locale)) {
-        if (fieldValue[plugin.locale]) {
-          output = output.replace(`{${field}}`, fieldValue[plugin.locale]);
-        } else {
-          output = output.replace(`{${field}}`, '');
-        }
-      } else if (typeof fieldValue === 'string') {
-        output = output.replace(`{${field}}`, fieldValue);
+  return new Promise(resolve => {
+    const promises = fields.map((field) => {
+      if (field.indexOf('.') !== -1) {
+        const parentField = field.substr(0, field.indexOf('.'));
+        const valueField = field.substr(field.indexOf('.') + 1);
+        return getLinkFieldValue(plugin, parentField, valueField);
       } else {
-        output = output.replace(`{${field}}`, '');
+        return new Promise(resolve2 => {
+          resolve2({ field, value: getFieldValue(plugin, field) });
+        })
       }
-    }
+    });
+
+    Promise.all(promises).then(values => {
+      console.log(values);
+      values.forEach(({ field, value }) => {
+        output = output.replace(`{${field}}`, value);
+      })
+    }).finally(() => {
+      output = output.replace(' ()', '').trim();
+      output = output.replace(/^>/, '').trim();
+      resolve(output);
+    });
   });
-
-  output = output.replace(' ()', '').trim();
-
-  return output;
 }
 
 window.DatoCmsPlugin.init((plugin) => {
   plugin.startAutoResizer();
 
   function getFields() {
-    const matches = plugin.parameters.instance.format.match(/\{([a-z_]+)\}/g);
+    const matches = plugin.parameters.instance.format.match(/\{([a-zA-Z_.]+)\}/g);
 
     return matches.map((m) => m.toString().replace(/^\{+|\}+$/g, ''));
   }
@@ -44,15 +89,20 @@ window.DatoCmsPlugin.init((plugin) => {
 
   document.body.appendChild(container);
 
-  if (plugin.getFieldValue(plugin.fieldPath) !== getValue(plugin, fields)) {
-    plugin.setFieldValue(plugin.fieldPath, getValue(plugin, fields));
-  }
+  getValue(plugin, fields).then(value => {
+    if (plugin.getFieldValue(plugin.fieldPath) !== value) {
+      plugin.setFieldValue(plugin.fieldPath, value);
+      input.textContent = value;
+    }
+  });
 
   fields.forEach((field) => {
     plugin.addFieldChangeListener(field, () => {
       if (plugin.locale === plugin.site.attributes.locales[0]) {
-        plugin.setFieldValue(plugin.fieldPath, getValue(plugin, fields));
-        input.textContent = getValue(plugin, fields);
+        getValue(plugin, fields).then(value => {
+          plugin.setFieldValue(plugin.fieldPath, value);
+          input.textContent = value;
+        })
       }
     });
   });

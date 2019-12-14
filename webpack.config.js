@@ -14,7 +14,7 @@ module.exports = {
   devServer: {
     contentBase: './',
     disableHostCheck: true,
-    public: 'https://datocms-plugin-composed-title.localtunnel.me',
+    public: 'http://datocms-plugin-composed-title.localtunnel.me',
   },
   module: {
     rules: [

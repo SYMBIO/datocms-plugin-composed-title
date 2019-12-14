@@ -6,7 +6,7 @@
   "main": "index.js",
   "scripts": {
     "start": "concurrently \"yarn dev\" \"yarn localtunnel\"",
-    "localtunnel": "lt -s datocms-plugin-composed-title --port 5000",
+    "localtunnel": "lt -s datocms-plugin-composed-title -h http://localtunnel.me --local-https false --port 5000",
     "dev": "NODE_ENV=development webpack-dev-server --port 5000",
     "dist": "NODE_ENV=production webpack --progress",
     "build": "NODE_ENV=production webpack --progress",
@@ -36,7 +36,15 @@
       "string"
     ],
     "parameters": {
-      "global": [],
+      "global": [
+        {
+          "id": "datoCmsApiToken",
+          "label": "DatoCMS API Token",
+          "type": "string",
+          "required": true,
+          "hint": "The DatoCMS API full-access token, <a href=\"/admin/access_tokens\">get it here</a>"
+        }
+      ],
       "instance": [
         {
           "id": "format",
