@@ -12,7 +12,7 @@ function getFieldValue(plugin, field) {
     if (typeof fieldValue === 'string') {
       return fieldValue;
     }
-    return '';
+    return fieldValue.toString();
   }
   return '';
 }
