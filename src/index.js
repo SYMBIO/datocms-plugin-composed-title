@@ -57,7 +57,6 @@ function getValue(plugin, fields) {
     });
 
     Promise.all(promises).then(values => {
-      console.log(values);
       values.forEach(({ field, value }) => {
         output = output.replace(`{${field}}`, value);
       })
