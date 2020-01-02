@@ -1,6 +1,7 @@
 import './style.css';
 
 function getFieldValue(plugin, field) {
+  console.log(plugin.fieldTypes);
   const fieldValue = plugin.getFieldValue(field);
   if (fieldValue) {
     if (typeof fieldValue === 'object' && Object.prototype.hasOwnProperty.call(fieldValue, plugin.locale)) {
