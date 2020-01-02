@@ -22,7 +22,7 @@ function getLinkFieldValue(plugin, linkField, field) {
     const modelName = plugin.itemType.attributes.api_key;
 
     return new Promise((resolve, reject) => {
-        const { data } = fetch('https://graphql.datocms.com/preview', {
+        fetch('https://graphql.datocms.com/preview', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -39,6 +39,7 @@ function getLinkFieldValue(plugin, linkField, field) {
               value: data[modelName][linkField] ? data[modelName][linkField][field] : '',
             });
           } else {
+            console.log(data, modelName);
             reject();
           }
         });
