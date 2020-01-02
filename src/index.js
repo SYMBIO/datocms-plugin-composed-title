@@ -21,7 +21,7 @@ function getLinkFieldValue(plugin, linkField, field) {
     const token = plugin.parameters.global.datoCmsApiToken;
     const modelName = plugin.itemType.attributes.api_key;
 
-    return new Promise(resolve => {
+    return new Promise((resolve, reject) => {
         const { data } = fetch('https://graphql.datocms.com/preview', {
           method: 'POST',
           headers: {
@@ -33,10 +33,14 @@ function getLinkFieldValue(plugin, linkField, field) {
             query: `{ ${modelName}(locale: ${plugin.locale}, filter: { id: { eq: "${plugin.itemId}" } }) { ${linkField} { ${field} } } }`,
           }),
         }).then(res => res.json()).then(({ data }) => {
-          resolve({
-            field: linkField + '.' + field,
-            value: data[modelName][linkField] ? data[modelName][linkField][field] : '',
-          });
+          if (data[modelName]) {
+            resolve({
+              field: linkField + '.' + field,
+              value: data[modelName][linkField] ? data[modelName][linkField][field] : '',
+            });
+          } else {
+            reject();
+          }
         });
     })
 }
