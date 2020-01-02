@@ -33,7 +33,7 @@ function getLinkFieldValue(plugin, linkField, field) {
             query: `{ ${modelName}(locale: ${plugin.locale}, filter: { id: { eq: "${plugin.itemId}" } }) { ${linkField} { ${field} } } }`,
           }),
         }).then(res => res.json()).then(({ data }) => {
-          if (data[modelName]) {
+          if (data && data[modelName]) {
             resolve({
               field: linkField + '.' + field,
               value: data[modelName][linkField] ? data[modelName][linkField][field] : '',
