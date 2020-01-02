@@ -39,7 +39,7 @@ function getLinkFieldValue(plugin, linkField, field) {
               value: data[modelName][linkField] ? data[modelName][linkField][field] : '',
             });
           } else {
-            console.log(data, modelName);
+            console.log(data, modelName, linkField, field);
             reject();
           }
         });
