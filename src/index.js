@@ -22,6 +22,7 @@ function getLinkFieldValue(plugin, linkField, field) {
     const modelName = plugin.itemType.attributes.api_key;
 
     return new Promise((resolve, reject) => {
+        console.log(`{ ${modelName}(locale: ${plugin.locale}, filter: { id: { eq: "${plugin.itemId}" } }) { ${linkField} { ${field} } } }`);
         fetch('https://graphql.datocms.com/preview', {
           method: 'POST',
           headers: {
