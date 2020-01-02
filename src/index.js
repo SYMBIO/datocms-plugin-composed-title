@@ -1,7 +1,8 @@
 import './style.css';
+import moment from 'moment';
 
 function getFieldValue(plugin, field) {
-  console.log(Object.values(plugin.fields).find(f => f.attributes.api_key === field));
+  const objField = Object.values(plugin.fields).find(f => f.attributes.api_key === field);
   const fieldValue = plugin.getFieldValue(field);
   if (fieldValue) {
     if (typeof fieldValue === 'object' && Object.prototype.hasOwnProperty.call(fieldValue, plugin.locale)) {
@@ -10,7 +11,9 @@ function getFieldValue(plugin, field) {
       }
       return '';
     }
-    if (typeof fieldValue === 'string') {
+    if (objField.attributes.field_type === 'date_time') {
+      return moment(fieldValue).format('YYYY-MM-DD HH:mm');
+    } else if (typeof fieldValue === 'string') {
       return fieldValue;
     }
     return fieldValue.toString();
