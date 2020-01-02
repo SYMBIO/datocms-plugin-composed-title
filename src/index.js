@@ -1,7 +1,8 @@
 import './style.css';
 
 function getFieldValue(plugin, field) {
-  console.log(plugin.itemType);
+  const objField = plugin.fields.find(f => f.api_key === field);
+  console.log(objField);
   const fieldValue = plugin.getFieldValue(field);
   if (fieldValue) {
     if (typeof fieldValue === 'object' && Object.prototype.hasOwnProperty.call(fieldValue, plugin.locale)) {
@@ -23,7 +24,6 @@ function getLinkFieldValue(plugin, linkField, field) {
     const modelName = plugin.itemType.attributes.api_key;
 
     return new Promise((resolve, reject) => {
-        console.log(`{ ${modelName}(locale: ${plugin.locale}, filter: { id: { eq: "${plugin.itemId}" } }) { ${linkField} { ${field} } } }`);
         fetch('https://graphql.datocms.com/preview', {
           method: 'POST',
           headers: {
@@ -41,7 +41,6 @@ function getLinkFieldValue(plugin, linkField, field) {
               value: data[modelName][linkField] ? data[modelName][linkField][field] : '',
             });
           } else {
-            console.log(data, modelName, linkField, field);
             reject();
           }
         });
