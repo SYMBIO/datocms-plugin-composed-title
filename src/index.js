@@ -12,7 +12,7 @@ function getFieldValue(plugin, field) {
       return '';
     }
     if (objField.attributes.field_type === 'date_time') {
-      return moment(fieldValue).tz(plugin.site.timezone).format('YYYY-MM-DD HH:mm');
+      return moment(fieldValue).tz(plugin.site.attributes.timezone).format('YYYY-MM-DD HH:mm');
     } else if (typeof fieldValue === 'string') {
       return fieldValue;
     }
