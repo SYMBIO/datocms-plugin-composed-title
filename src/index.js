@@ -1,5 +1,5 @@
 import './style.css';
-import moment from 'moment';
+import moment from 'moment-timezone';
 
 function getFieldValue(plugin, field) {
   const objField = Object.values(plugin.fields).find(f => f.attributes.api_key === field);
@@ -12,7 +12,7 @@ function getFieldValue(plugin, field) {
       return '';
     }
     if (objField.attributes.field_type === 'date_time') {
-      return moment(fieldValue).format('YYYY-MM-DD HH:mm');
+      return moment(fieldValue).tz(plugin.site.timezone).format('YYYY-MM-DD HH:mm');
     } else if (typeof fieldValue === 'string') {
       return fieldValue;
     }
