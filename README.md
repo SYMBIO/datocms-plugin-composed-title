@@ -26,7 +26,7 @@ Start the local development server with:
 yarn start
 ```
 
-The plugin will be served from [https://datocms-plugin-composed-title.localtunnel.me/](https://datocms-plugin-composed-title.localtunnel.me/). Insert this URL as the plugin [Entry point URL](https://www.datocms.com/docs/plugins/creating-a-new-plugin/).
+The plugin will be served from [https://datocms-plugin-composed-title.tunnel.datahub.at/](https://datocms-plugin-composed-title.localtunnel.me/). Insert this URL as the plugin [Entry point URL](https://www.datocms.com/docs/plugins/creating-a-new-plugin/).
 
 ## Publishing
 

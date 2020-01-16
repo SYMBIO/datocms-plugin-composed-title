@@ -6,7 +6,7 @@
   "main": "index.js",
   "scripts": {
     "start": "concurrently \"yarn dev\" \"yarn localtunnel\"",
-    "localtunnel": "lt -s datocms-plugin-composed-title -h http://localtunnel.me --local-https false --port 5000",
+    "localtunnel": "lt -s datocms-plugin-composed-title -h https://tunnel.datahub.at --local-https false --port 5000",
     "dev": "NODE_ENV=development webpack-dev-server --port 5000",
     "dist": "NODE_ENV=production webpack --progress",
     "build": "NODE_ENV=production webpack --progress",

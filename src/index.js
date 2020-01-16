@@ -1,6 +1,8 @@
 import './style.css';
 import moment from 'moment-timezone';
 
+const store = {};
+
 function getFieldValue(plugin, field) {
   const objField = Object.values(plugin.fields).find(f => f.attributes.api_key === field);
   const fieldValue = plugin.getFieldValue(field);
@@ -23,9 +25,17 @@ function getFieldValue(plugin, field) {
 
 function getLinkFieldValue(plugin, linkField, field) {
     const token = plugin.parameters.global.datoCmsApiToken;
-    const modelName = plugin.itemType.attributes.api_key;
+    const linkFieldUS = linkField.replace(/([A-Z])/g, function (x,y){
+      return "_" + y.toLowerCase()
+    });
 
-    return new Promise((resolve, reject) => {
+
+    if (linkFieldUS === 'parent') {
+      const itemType = plugin.itemType;
+      const modelName = itemType.attributes.api_key.replace(/(_[a-z])/g, function (x, y) {
+        return y[1].toUpperCase()
+      });
+      return new Promise((resolve, reject) => {
         fetch('https://graphql.datocms.com/preview', {
           method: 'POST',
           headers: {
@@ -34,40 +44,104 @@ function getLinkFieldValue(plugin, linkField, field) {
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
-            query: `{ ${modelName}(locale: ${plugin.locale}, filter: { id: { eq: "${plugin.itemId}" } }) { ${linkField} { ${field} } } }`,
+            query: `{ ${modelName}(locale: cs, filter: { id: { eq: "${plugin.itemId}" } }) { parent { ${field} } } }`,
           }),
-        }).then(res => res.json()).then(({ data }) => {
-          if (data && data[modelName]) {
-            resolve({
-              field: linkField + '.' + field,
-              value: data[modelName][linkField] ? data[modelName][linkField][field] : '',
-            });
-          } else {
-            reject();
+        })
+          .then(res => res.json())
+          .then(({ data }) => {
+            if (data && data[modelName]) {
+              resolve({
+                field: linkField + '.' + field,
+                value: data[modelName].parent[field] ? data[modelName].parent[field] : '',
+              });
+            } else {
+              reject();
+            }
+          });
+      })
+    } else {
+      const objFields = Object.values(plugin.fields)
+        .filter(f => f.relationships.item_type.data.id === plugin.itemType.id && f.attributes.api_key === linkFieldUS);
+      if (objFields.length > 0) {
+        const objField = objFields[0];
+        const itemTypes = Object.values(plugin.itemTypes)
+          .filter(t => t.id === objField.attributes.validators.item_item_type.item_types[0]);
+        if (itemTypes.length > 0) {
+          const itemType = itemTypes[0];
+          const modelName = itemType.attributes.api_key.replace(/(_[a-z])/g, function (x, y) {
+            return y[1].toUpperCase()
+          });
+          const value = plugin.getFieldValue(linkFieldUS);
+
+          if (value) {
+            return new Promise((resolve, reject) => {
+              fetch('https://graphql.datocms.com/preview', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  Accept: 'application/json',
+                  Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                  query: `{ ${modelName}(locale: cs, filter: { id: { eq: "${value}" } }) { ${field} } }`,
+                }),
+              })
+                .then(res => res.json())
+                .then(({ data }) => {
+                  if (data && data[modelName]) {
+                    resolve({
+                      field: linkField + '.' + field,
+                      value: data[modelName][field] ? data[modelName][field] : '',
+                    });
+                  } else {
+                    reject();
+                  }
+                });
+            })
           }
-        });
-    })
+        }
+      }
+    }
+
+    return new Promise((resolve, reject) => {
+      resolve({
+        field: linkField + '.' + field,
+        value: '',
+      });
+    });
+}
+
+function getFieldPromises(plugin, field) {
+  if (field.indexOf('.') !== -1) {
+    const parentField = field.substr(0, field.indexOf('.'));
+    const valueField = field.substr(field.indexOf('.') + 1);
+    return getLinkFieldValue(plugin, parentField, valueField);
+  } else {
+    return new Promise(resolve2 => {
+      resolve2({ field, value: getFieldValue(plugin, field) });
+    });
+  }
 }
 
 function getValue(plugin, fields) {
   let output = plugin.parameters.instance.format;
   return new Promise(resolve => {
-    const promises = fields.map((field) => {
-      if (field.indexOf('.') !== -1) {
-        const parentField = field.substr(0, field.indexOf('.'));
-        const valueField = field.substr(field.indexOf('.') + 1);
-        return getLinkFieldValue(plugin, parentField, valueField);
-      } else {
-        return new Promise(resolve2 => {
-          resolve2({ field, value: getFieldValue(plugin, field) });
-        })
-      }
-    });
+    let promises = [];
+    if (Array.isArray(fields)) {
+      fields.forEach((field) => {
+        promises.push(getFieldPromises(plugin, field));
+      });
+    } else {
+      promises.push(getFieldPromises(plugin, fields))
+    }
 
     Promise.all(promises).then(values => {
       values.forEach(({ field, value }) => {
-        output = output.replace(`{${field}}`, value);
-      })
+        store[field] = value;
+      });
+      for (const field in store) {
+        output = output.replace(`{${field}}`, store[field]);
+      }
     }).finally(() => {
       output = output.replace(' ()', '').trim();
       output = output.replace(/^>/, '').trim();
@@ -104,13 +178,19 @@ window.DatoCmsPlugin.init((plugin) => {
   });
 
   fields.forEach((field) => {
-    plugin.addFieldChangeListener(field, () => {
-      if (plugin.locale === plugin.site.attributes.locales[0]) {
-        getValue(plugin, fields).then(value => {
-          plugin.setFieldValue(plugin.fieldPath, value);
-          input.textContent = value;
-        })
-      }
+    const fieldName = field.split('.')[0].replace(/([A-Z])/g, function (x,y){
+      return "_" + y.toLowerCase()
     });
+    if (fieldName !== 'parent') {
+      plugin.addFieldChangeListener(fieldName, () => {
+        if (plugin.locale === plugin.site.attributes.locales[0]) {
+          getValue(plugin, field)
+            .then(value => {
+              plugin.setFieldValue(plugin.fieldPath, value);
+              input.textContent = value;
+            })
+        }
+      });
+    }
   });
 });
