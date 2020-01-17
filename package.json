@@ -42,7 +42,7 @@
           "label": "DatoCMS API Token",
           "type": "string",
           "required": true,
-          "hint": "The DatoCMS API full-access token, <a href=\"/admin/access_tokens\">get it here</a>"
+          "hint": "The DatoCMS API read-only token, <a href=\"/admin/access_tokens\">get it here</a>"
         }
       ],
       "instance": [
