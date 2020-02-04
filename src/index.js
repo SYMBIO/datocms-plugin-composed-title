@@ -15,6 +15,8 @@ function getFieldValue(plugin, field) {
     }
     if (objField.attributes.field_type === 'date_time') {
       return moment(fieldValue).tz(plugin.site.attributes.timezone).format('YYYY-MM-DD HH:mm');
+    } else if (objField.attributes.field_type === 'boolean') {
+      return fieldValue ? ' - ' + objField.attributes.label : '';
     } else if (typeof fieldValue === 'string') {
       return fieldValue;
     }
