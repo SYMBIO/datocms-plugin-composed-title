@@ -57,7 +57,10 @@ function getLinkFieldValue(plugin, linkField, field) {
                 value: data[modelName].parent[field] ? data[modelName].parent[field] : '',
               });
             } else {
-              reject();
+              resolve({
+                field: linkField + '.' + field,
+                value: '',
+              });
             }
           });
       })
