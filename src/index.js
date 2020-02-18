@@ -51,7 +51,7 @@ function getLinkFieldValue(plugin, linkField, field) {
         })
           .then(res => res.json())
           .then(({ data }) => {
-            if (data && data[modelName]) {
+            if (data && data[modelName] && data[modelName].parent) {
               resolve({
                 field: linkField + '.' + field,
                 value: data[modelName].parent[field] ? data[modelName].parent[field] : '',
