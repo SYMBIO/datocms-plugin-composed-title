@@ -47,8 +47,8 @@ module.exports = {
       append: false,
       publicPath: '',
       tags: [
-        { type: 'css', path: 'https://unpkg.com/datocms-plugins-sdk/dist/sdk.css' },
-        { type: 'js', path: 'https://unpkg.com/datocms-plugins-sdk/dist/sdk.js' },
+        { type: 'css', path: 'https://unpkg.com/datocms-plugins-sdk@0.1.2/dist/sdk.css' },
+        { type: 'js', path: 'https://unpkg.com/datocms-plugins-sdk@0.1.2/dist/sdk.js' },
       ],
     }),
   ].filter(Boolean),
